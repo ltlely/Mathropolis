@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/Mathropolis/static/css/main.964f1e1f.css",
-    "main.js": "/Mathropolis/static/js/main.54f26387.js",
+    "main.js": "/Mathropolis/static/js/main.67d37f8e.js",
     "static/js/488.50442ee8.chunk.js": "/Mathropolis/static/js/488.50442ee8.chunk.js",
     "index.html": "/Mathropolis/index.html",
     "main.964f1e1f.css.map": "/Mathropolis/static/css/main.964f1e1f.css.map",
-    "main.54f26387.js.map": "/Mathropolis/static/js/main.54f26387.js.map",
+    "main.67d37f8e.js.map": "/Mathropolis/static/js/main.67d37f8e.js.map",
     "488.50442ee8.chunk.js.map": "/Mathropolis/static/js/488.50442ee8.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.964f1e1f.css",
-    "static/js/main.54f26387.js"
+    "static/js/main.67d37f8e.js"
   ]
 }
