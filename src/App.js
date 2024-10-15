@@ -17,11 +17,44 @@ function App() {
     setEmailError('');
   }
 
-  // Handle login form submission
-  function handleLogin(event) {
+   // Handle login form submission
+   async function handleLogin(event) {
     event.preventDefault();
-    navigate('/lobby');
+
+    const formData = {
+      username: event.target[0].value, // Capture username
+      password: event.target[1].value, // Capture password
+    };
+   
+    try {
+      const response = await fetch('http://localhost:3001/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Login failed');
+      }
+
+      const data = await response.json();
+
+      if (response.status === 200) {
+        console.log('Navigating to lobby with username:', data.username);
+        // Navigate to the lobby and pass the username in state
+        navigate('/lobby', { state: { username: data.username } });
+      }
+    } catch (error) {
+      setErrorMessage(error.message || 'An error occurred during login.');
+    }
   }
+
 
   // Handle sign-up form submission
   async function handleSignUp(event) {

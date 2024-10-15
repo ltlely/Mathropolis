@@ -3,11 +3,18 @@ const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const app = express();
+const cors = require('cors'); 
 require('dotenv').config();
+
+
+app.use(cors({
+  origin: 'http://localhost:3000',
+}));
 
 // Middleware to parse JSON and URL-encoded data from the request body
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 
 // Create a MySQL connection
 const db = mysql.createConnection({
@@ -114,7 +121,7 @@ app.get('*', (req, res) => {
 
 
 // Start the server
-const PORT = 3000;
+const PORT = 3001;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

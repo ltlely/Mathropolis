@@ -1,26 +1,26 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-
-const app = express();
-const server = http.createServer(app);
 const io = new Server(server);
 
+let playerCount = 0; // Track number of connected players
+const maxPlayers = 4;
 
 io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
+  const username = socket.handshake.query.username; // Get username from query when connecting
 
+  if (playerCount >= maxPlayers) {
+    socket.emit('maxPlayersReached');
+    socket.disconnect();
+    return;
+  }
 
-  socket.broadcast.emit('playerJoined', { id: socket.id });
+  playerCount++; // Increment player count when someone connects
+  const playerNumber = playerCount;
 
+  // Emit the player's ID, number, and username to the client
+  io.emit('playerJoined', { id: socket.id, playerNumber, username });
 
+  // Handle disconnection
   socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-    socket.broadcast.emit('playerLeft', { id: socket.id });
+    io.emit('playerLeft', { id: socket.id });
+    playerCount--;
   });
-
-});
-
-server.listen(3001, () => {
-  console.log('Server is listening on port 3001');
 });
