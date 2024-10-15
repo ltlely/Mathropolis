@@ -27,7 +27,7 @@ function App() {
     };
    
     try {
-      const response = await fetch('https://ltlely.github.io/Mathropolis/login', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,6 +37,12 @@ function App() {
           password: formData.password,
         }),
       });
+
+      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+
+      if (!BACKEND_URL) {
+        throw new Error('REACT_APP_BACKEND_URL is not defined');
+      }
       
       if (!response.ok) {
         const errorData = await response.json();
