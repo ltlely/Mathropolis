@@ -129,10 +129,10 @@ function App() {
   }
 
   return (
-    <div className="container">
+    <div className="container-form">
       {isLogin ? (
         <div className="form-container">
-          <h2>Login</h2>
+          <h2 id="login">Login</h2>
           <form onSubmit={handleLogin}>
             <input type="text" placeholder="Username" required />
             <input type="password" placeholder="Password" required />

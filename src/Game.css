@@ -1,3 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    background-size: cover;
+    background-attachment: fixed;
+    font-family: 'Orbitron', sans-serif;
+    color: #f0f0f0;
+    overflow: hidden;
+  }
+
 
 .container {
     display: flex;
@@ -7,6 +21,9 @@
     height: 550px;
     background-color: #6D6875;
     box-shadow: 4px 4px 15px 5px #76727a;
+    margin: 50px auto;
+    border-radius: 15px;
+    position: relative;
 }
 
 .container-item1 {
@@ -19,7 +36,6 @@
 }
 
 .container-item1, .container-item2 {
-    background-color: #FFB4A2;
     top: -50px;
     border-radius: 20px;
     display: flex;
@@ -28,6 +44,10 @@
     position: relative;
     width: 400px;
     height: 350px;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    font-size: 1.2em;
+    color: #00ffff;
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
 .numberButtons {
@@ -35,51 +55,232 @@
     justify-content: center;
     align-items: center;
     position: absolute;
-    bottom: 330px;
+    bottom: 50px;
 }
 
+.numberButtons button {
+    margin: 12px;
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    border: 2px solid #ff00ff;
+    background-color: rgba(255, 0, 255, 0.2);
+    color: #ff00ff;
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+  }
+  
+  .numberButtons button:hover {
+    background-color: rgba(255, 0, 255, 0.4);
+    box-shadow: 0 0 10px #ff00ff;
+  }
+  
 .displayProblem {
     display: flex;
     justify-content: center;
     align-items: center;
     position: absolute;
     top: 85px;
+    font-size: 2em;
+    color: #ff00ff;
+    text-align: center;
+    margin-bottom: 20px;
 }
 
 .inputBox {
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 60px;
+    height: 70px;
+    margin: 5px;
+    border: 2px solid #00ffff;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    color: #00ffff;
+    font-size: 1.5em;
+    box-shadow: 0 0 10px #00ffff;
     position: relative;
-    top: 30px;
-    width: 50px;
-    height: 60px;
-    margin: 2px;
-    border: 2px solid #FFCDB2; 
-    background-color: #f0f0f0; 
-    border-radius: 5px;
-   
-}
+    top: 50px;
+    left: -75px;
+  }
 
-.profile-container {
+.numberButtons {
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-top: 30px;
+  }
+  
+  .numberButtons button {
+    margin: 12px;
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    border: 2px solid #ff00ff;
+    background-color: rgba(255, 0, 255, 0.2);
+    color: #ff00ff;
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+  }
+  
+  .numberButtons button:hover {
+    background-color: rgba(255, 0, 255, 0.4);
+    box-shadow: 0 0 10px #ff00ff;
+  }
+  
+  /* Players row styling */
+  .players-container {
+    width: 100%;
+  }
+  
+  .players-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20px;
+    margin-top: 20px;
+    bottom: 30px;
     position: relative;
-    top: 40px;
-}
+  }
+  
+  .player-card {
+    width: 150px;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    color: #f0f0f0;
+  }
+  
+  .avatar-container {
+    width: 80px;
+    height: 80px;
+    overflow: hidden;
+    margin: 0 auto;
+    border-radius: 50%;
+    border: 2px solid #ff00ff;
+    box-shadow: 0 0 10px #ff00ff;
+  }
+  
+  .avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .player-name {
+    font-weight: bold;
+    margin-top: 10px;
+    font-size: 16px;
+    color: #ff00ff;
+  }
+  
+  .player-stats {
+    margin-top: 5px;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #00ffff;
+  }
+  
+  .player-score {
+    color: #00ffff;
+  }
+  
+  .active-player {
+    border: 2px solid #00ffff;
+    background-color: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 10px #00ffff;
+  }
+  
+  /* Countdown overlay styling */
+  .countdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #00ffff;
+    font-size: 5rem;
+    z-index: 100;
+  }
+  
+  .countdown-overlay p {
+    font-size: 2rem;
+    margin-top: 20px;
+    color: #ff00ff;
+  }
+  
+  .countdown-overlay h1 {
+    font-size: 5rem;
+    color: #00ffff;
+  }
+  
+  /* Animation for incorrect answers */
+  .incorrect {
+    background-color: rgba(255, 0, 0, 0.3);
+    transition: background-color 0.5s ease;
+  }
+  
+  /* Animation classes */
+  .animate-problem {
+    animation: slideIn 1s ease-in-out;
+  }
+  
+  @keyframes slideIn {
+    0% {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
 
-.firstTeam {
-    background-color: #8d8d8d;
-}
 
-.secondTeam {
-    background-color: rgb(81, 104, 104);
+.team {
+    padding: 10px; /* Padding for better spacing */
+    top: -150px;
+    position: relative;
+    color: #00ffff;
+    white-space: nowrap;
 }
-
-.firstTeam, .secondTeam {
-    width: 180px;      
-    height: 180px;    
-    border-radius: 50%; 
-    margin: 20px;
-}
+  
+/* Game Header */
+.game-header {
+    width: 100px;
+    margin: 20px auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  
+  /* Quit Button */
+  .quit-button {
+    background-color: transparent;
+    color: #ff0000; /* Neon red */
+    border: 2px solid #ff0000;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    box-shadow: 0 0 5x #ff0000;
+    transition: background-color 0.3s, color 0.3s;
+    top: 20px;
+    position: relative;
+  }
+  
+  .quit-button:hover {
+    background-color: #ff0000;
+    color: #ffffff;
+  }
+  

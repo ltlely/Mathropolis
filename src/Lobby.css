@@ -1,0 +1,130 @@
+/* Lobby.css */
+
+/* Apply styles to the body to set the background */
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    background-size: cover;
+    background-attachment: fixed;
+    font-family: 'Orbitron', sans-serif; /* Cyberpunk-style font */
+    color: #f0f0f0;
+  }
+  
+  /* Import a cyberpunk font */
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+  
+  .lobby-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center; /* Center the text */
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 600px;
+    margin: 50px auto;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.5); /* Neon glow effect */
+  }
+  
+  h1 {
+    color: #ff00ff; /* Neon pink */
+    margin-bottom: 20px;
+    font-size: 2.5em;
+  }
+  
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .avatar-preview {
+    margin: 15px;
+  }
+  
+  .avatar-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #00ffff; /* Neon cyan */
+    box-shadow: 0 0 15px #00ffff;
+  }
+  
+  .avatar-placeholder {
+    width: 150px;
+    height: 150px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 4px dashed #00ffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #00ffff;
+    font-size: 1.2em;
+    box-shadow: 0 0 15px #00ffff;
+  }
+  
+  .username-display {
+    font-size: 1.5em;
+    color: #ff00ff; /* Neon pink */
+    margin-bottom: 15px;
+  }
+  
+  .upload-button {
+    margin: 10px;
+    background-color: rgba(0, 255, 255, 0.2); /* Semi-transparent neon cyan */
+    padding: 12px 25px;
+    border: 2px solid #00ffff;
+    border-radius: 8px;
+    color: #00ffff;
+    cursor: pointer;
+    font-size: 1em;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    text-transform: uppercase;
+  }
+  
+  .upload-button:hover {
+    background-color: rgba(0, 255, 255, 0.4);
+    box-shadow: 0 0 10px #00ffff;
+  }
+  
+  .upload-button input[type="file"] {
+    opacity: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    cursor: pointer;
+  }
+  
+  .start-game-button {
+    margin-top: 25px;
+    background-color: rgba(255, 0, 255, 0.2); /* Semi-transparent neon pink */
+    padding: 15px 35px;
+    border: 2px solid #ff00ff;
+    border-radius: 10px;
+    color: #ff00ff;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    text-transform: uppercase;
+  }
+  
+  .start-game-button:hover {
+    background-color: rgba(255, 0, 255, 0.4);
+    box-shadow: 0 0 10px #ff00ff;
+  }
+  
+  .loading-text,
+  .waiting-text {
+    font-size: 1.2em;
+    color: #00ffff;
+    margin-top: 20px;
+  }
+  
+  

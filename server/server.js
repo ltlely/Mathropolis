@@ -104,7 +104,7 @@ app.post('/login', (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
     if (isPasswordValid) {
-      res.status(200).json({ message: 'Login successful!' });
+      res.status(200).json({ message: 'Login successful!' , username: user.username});
     } else {
       res.status(401).json({ error: 'Invalid password' });
     }
