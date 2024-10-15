@@ -27,7 +27,7 @@ function App() {
     };
    
     try {
-      const response = await fetch('http://localhost:3001/login', {
+      const response = await fetch('https://ltlely.github.io/Mathropolis/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
