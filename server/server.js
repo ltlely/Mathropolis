@@ -23,11 +23,10 @@ const allowedOrigins = [
 
 // CORS configuration
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // Allow requests without origin (like curl or mobile apps)
-    
-    // Allow requests from allowed origins
-    if (allowedOrigins.indexOf(origin) !== -1) {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g., mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       console.error('CORS policy violation: Origin not allowed:', origin);
@@ -36,7 +35,7 @@ const corsOptions = {
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
-  credentials: true, // Allow credentials like cookies or Authorization headers
+  credentials: true, // Allow cookies and Authorization headers
 };
 
 
