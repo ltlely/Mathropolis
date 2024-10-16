@@ -18,7 +18,6 @@ const server = http.createServer(app);
 const allowedOrigins = [
   'http://localhost:3000',
   'https://mathropolis-8u5v79y7m-lylys-projects.vercel.app',
-  'https://api-mathropolis.herokuapp.com',
   'https://www.themathropolis.com'
 ];
 
@@ -35,7 +34,7 @@ const corsOptions = {
       callback(new Error('CORS policy violation: Origin not allowed'));
     }
   },
-  methods: ['GET', 'POST', 'OPTIONS'], // Allowed methods
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
   credentials: true, // Allow credentials like cookies or Authorization headers
 };
@@ -44,6 +43,9 @@ const corsOptions = {
 
 // Apply the CORS middleware to all routes
 app.use(cors(corsOptions));
+
+app.options('*', cors(corsOptions)); // Handle preflight requests
+
 
 // Middleware to parse JSON and URL-encoded data from the request body
 app.use(express.json());
