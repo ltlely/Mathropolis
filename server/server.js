@@ -17,33 +17,27 @@ const server = http.createServer(app);
 // Define allowed origins
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://mathropolis-qsl6fppb6-lylys-projects.vercel.app',
-  'https://git.heroku.com/mathropolis.git',
+  'https://mathropolis-8u5v79y7m-lylys-projects.vercel.app',
+  'https://api-mathropolis.herokuapp.com',
   'https://www.themathropolis.com'
 ];
 
 // CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-
-    // Allow same-origin requests (from localhost:3001)
-    if (origin === 'http://localhost:3001') {
-      return callback(null, true);
-    }
-
-    // Allow other specified origins
+    if (!origin) return callback(null, true); // Allow requests without origin (like curl or mobile apps)
+    
+    // Allow requests from allowed origins
     if (allowedOrigins.indexOf(origin) !== -1) {
-      return callback(null, true);
+      callback(null, true);
     } else {
       console.error('CORS policy violation: Origin not allowed:', origin);
       callback(new Error('CORS policy violation: Origin not allowed'));
     }
   },
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true, // Allow credentials like cookies or authorization headers
+  methods: ['GET', 'POST', 'OPTIONS'], // Allowed methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+  credentials: true, // Allow credentials like cookies or Authorization headers
 };
 
 
