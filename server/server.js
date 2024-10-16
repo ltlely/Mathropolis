@@ -16,9 +16,8 @@ const server = http.createServer(app);
 
 // Configure CORS options
 const allowedOrigins = [
-  'http://localhost:3000',
-  'https://mathropolis-qsl6fppb6-lylys-projects.vercel.app',
-  'https://www.themathropolis.com',
+  'https://www.themathropolis.com', 
+  'https://api.themathropolis.com'
 ];
 
 const corsOptions = {
