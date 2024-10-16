@@ -14,23 +14,26 @@ const app = express();
 // Create an HTTP server
 const server = http.createServer(app);
 
-// Initialize Socket.IO with CORS configuration
-const io = socketIo(server, {
-  cors: {
-    origin: ['http://localhost:3000', 'https://mathropolis-nb3noapoi-lylys-projects.vercel.app'], // Your frontend URL
-    methods: ['GET', 'POST'],
-    credentials: true,
-  },
-});
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://mathropolis-tgybkcclb-lylys-projects.vercel.app',
+  'https://api.themathropolis.com', // Add your backend URL if needed
+  'https://www.themathropolis.com', // Your main frontend URL
+];
 
-app.use(cors(corsOptions));
-
-// Configure CORS for Express routes
-app.use(cors({
-  origin: 'https://mathropolis-nb3noapoi-lylys-projects.vercel.app', // Your frontend URL
+const corsOptions = {
+  origin: allowedOrigins,
   methods: ['GET', 'POST'],
   credentials: true,
-}));
+};
+
+// Apply CORS middleware to Express
+app.use(cors(corsOptions));
+
+// Initialize Socket.IO with CORS configuration
+const io = socketIo(server, {
+  cors: corsOptions
+});
 
 // Middleware
 app.use(express.json());

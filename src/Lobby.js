@@ -5,6 +5,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { io } from 'socket.io-client';
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+
+const socket = io(BACKEND_URL, {
+  withCredentials: true,
+  extraHeaders: {
+    'my-custom-header': 'abcd',
+  },
+});
+
 const Lobby = () => {
   const [avatar, setAvatar] = useState(null);
   const [players, setPlayers] = useState([]); // State for connected players
@@ -14,7 +23,7 @@ const Lobby = () => {
   const username = location.state?.username || 'Unknown Player';
 
   // Initialize socket with username as query parameter
-  const socket = io('http://localhost:3001', {
+  const socket = io(BACKEND_URL, {
     query: { username },
   });
 
