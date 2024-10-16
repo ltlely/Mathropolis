@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+
 function App() {
   const [isLogin, setIsLogin] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
@@ -25,9 +27,9 @@ function App() {
       username: event.target[0].value, // Capture username
       password: event.target[1].value, // Capture password
     };
-   
+
     try {
-      const response = await fetch('http://localhost:3001/login', {
+      const response = await fetch(`${BACKEND_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,7 +84,7 @@ function App() {
 
     // Proceed with sign-up process if no validation errors
     try {
-      const response = await fetch('/signup', { // Ensure correct API endpoint
+      const response = await fetch(`${BACKEND_URL}/signup`, { // Ensure correct API endpoint
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
