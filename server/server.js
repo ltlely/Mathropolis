@@ -23,6 +23,8 @@ const io = socketIo(server, {
   },
 });
 
+app.use(cors(corsOptions));
+
 // Configure CORS for Express routes
 app.use(cors({
   origin: 'https://mathropolis-nb3noapoi-lylys-projects.vercel.app', // Your frontend URL
