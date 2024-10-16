@@ -5,7 +5,9 @@ import { io } from 'socket.io-client';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 
-const socket = io('http://localhost:3001');
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
+
+const socket = io(BACKEND_URL);
 
 const Game = () => {
   const numbers = [0,1,2,3,4,5,6,7,8,9];
