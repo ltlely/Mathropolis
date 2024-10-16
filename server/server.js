@@ -16,14 +16,21 @@ const server = http.createServer(app);
 
 // Configure CORS options
 const allowedOrigins = [
-  'https://www.themathropolis.com', 
-  'https://api.themathropolis.com'
+  'http://localhost:3000',
+  'https://mathropolis-qsl6fppb6-lylys-projects.vercel.app',
+  'https://www.themathropolis.com'
 ];
+
+const headers = {
+  'Content-Type':'application/json',
+  'Access-Control-Allow-Origin':'*',
+  'Access-Control-Allow-Methods':'POST,GET,OPTIONS'
+}
 
 const corsOptions = {
   origin: allowedOrigins,
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: headers,
   credentials: true,
 };
 
