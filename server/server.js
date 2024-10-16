@@ -27,8 +27,11 @@ const corsOptions = {
   credentials: true,
 };
 
+// Apply the CORS middleware to all routes
+app.use(cors(corsOptions));
+
 // Apply CORS middleware to Express
-app.use('*', cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Middleware to parse JSON and URL-encoded data from the request body
 app.use(express.json());
