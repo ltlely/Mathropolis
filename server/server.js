@@ -14,31 +14,31 @@ const app = express();
 // Create an HTTP server
 const server = http.createServer(app);
 
-// Configure CORS options
+// Define allowed origins
 const allowedOrigins = [
   'http://localhost:3000',
   'https://mathropolis-qsl6fppb6-lylys-projects.vercel.app',
   'https://www.themathropolis.com'
 ];
 
-const headers = {
-  'Content-Type':'application/json',
-  'Access-Control-Allow-Origin':'*',
-  'Access-Control-Allow-Methods':'POST,GET,OPTIONS'
-}
-
+// CORS configuration
 const corsOptions = {
-  origin: allowedOrigins,
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy violation: Origin not allowed'));
+    }
+  },
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: headers,
-  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true, // Allow cookies and other credentials
 };
 
 // Apply the CORS middleware to all routes
 app.use(cors(corsOptions));
-
-// Apply CORS middleware to Express
-app.options('*', cors(corsOptions));
 
 // Middleware to parse JSON and URL-encoded data from the request body
 app.use(express.json());
@@ -199,8 +199,22 @@ io.on('connection', (socket) => {
 
     io.emit('playerLeft', { id: socket.id });
   });
-});
 
+  // Optional: Handle 'playerLeft' event from client (if you emit it on logout)
+  socket.on('playerLeft', (data) => {
+    const { id } = data;
+    console.log(`Player ${id} has left.`);
+
+    // Remove player from teams and players list
+    ['team1', 'team2'].forEach((team) => {
+      teams[team] = teams[team].filter((player) => player.id !== id);
+    });
+    players = players.filter((player) => player.id !== id);
+    playerCount--;
+
+    io.emit('playerLeft', { id });
+  });
+});
 
 // === Serve Static Files ===
 
