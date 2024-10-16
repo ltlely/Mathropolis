@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "node server/server.js",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "heroku-postbuild": "cd client && npm install && npm run build",
@@ -38,7 +38,6 @@
   },
   "proxy": "http://localhost:3001",
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "gh-pages": "^6.2.0"
   }
 }

@@ -18,6 +18,7 @@ const server = http.createServer(app);
 const allowedOrigins = [
   'http://localhost:3000',
   'https://mathropolis-qsl6fppb6-lylys-projects.vercel.app',
+  'https://git.heroku.com/mathropolis.git',
   'https://www.themathropolis.com'
 ];
 
@@ -26,16 +27,26 @@ const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
+
+    // Allow same-origin requests (from localhost:3001)
+    if (origin === 'http://localhost:3001') {
+      return callback(null, true);
+    }
+
+    // Allow other specified origins
     if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
+      return callback(null, true);
     } else {
+      console.error('CORS policy violation: Origin not allowed:', origin);
       callback(new Error('CORS policy violation: Origin not allowed'));
     }
   },
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true, // Allow cookies and other credentials
+  credentials: true, // Allow credentials like cookies or authorization headers
 };
+
+
 
 // Apply the CORS middleware to all routes
 app.use(cors(corsOptions));
@@ -143,6 +154,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
+
 // === Socket.IO Logic ===
 
 let playerCount = 0;
@@ -199,22 +211,8 @@ io.on('connection', (socket) => {
 
     io.emit('playerLeft', { id: socket.id });
   });
-
-  // Optional: Handle 'playerLeft' event from client (if you emit it on logout)
-  socket.on('playerLeft', (data) => {
-    const { id } = data;
-    console.log(`Player ${id} has left.`);
-
-    // Remove player from teams and players list
-    ['team1', 'team2'].forEach((team) => {
-      teams[team] = teams[team].filter((player) => player.id !== id);
-    });
-    players = players.filter((player) => player.id !== id);
-    playerCount--;
-
-    io.emit('playerLeft', { id });
-  });
 });
+
 
 // === Serve Static Files ===
 
