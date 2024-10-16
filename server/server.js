@@ -17,7 +17,7 @@ const server = http.createServer(app);
 // Define allowed origins
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://git.heroku.com/mathropolis.git',
+  'https://mathropolis-qsl6fppb6-lylys-projects.vercel.app',
   'https://www.themathropolis.com'
 ];
 
