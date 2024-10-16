@@ -7,13 +7,6 @@ import { io } from 'socket.io-client';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
 
-const socket = io(BACKEND_URL, {
-  withCredentials: true,
-  extraHeaders: {
-    'my-custom-header': 'abcd',
-  },
-});
-
 const Lobby = () => {
   const [avatar, setAvatar] = useState(null);
   const [players, setPlayers] = useState([]); // State for connected players

@@ -16,9 +16,9 @@ const server = http.createServer(app);
 
 // Configure CORS options
 const allowedOrigins = [
-  'http://localhost:3000', // For development
-  'https://mathropolis-qsl6fppb6-lylys-projects.vercel.app', // Your deployed frontend
-  'https://www.themathropolis.com', // Your main frontend URL (if applicable)
+  'http://localhost:3000',
+  'https://mathropolis-qsl6fppb6-lylys-projects.vercel.app',
+  'https://www.themathropolis.com',
 ];
 
 const corsOptions = {
@@ -45,7 +45,7 @@ const connectionString = process.env.DATABASE_URL;
 const pool = new Pool({
   connectionString,
   ssl: {
-    rejectUnauthorized: false, // Supabase requires SSL connection
+    rejectUnauthorized: false,
   },
 });
 
