@@ -1,5 +1,5 @@
 {
-  "homepage" : "https://ltlely.github.io/Mathropolis",
+  "homepage" : "https://ltlely.github.io/Mathropolis/",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
