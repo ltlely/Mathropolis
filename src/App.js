@@ -19,44 +19,47 @@ function App() {
     setEmailError('');
   }
 
-   // Handle login form submission
-   async function handleLogin(event) {
-    event.preventDefault();
-
-    const formData = {
-      username: event.target[0].value, // Capture username
-      password: event.target[1].value, // Capture password
-    };
-
+  async function handleLogin(event) {
+    event.preventDefault(); // Prevent page refresh
+  
+    // Use FormData to collect the form input values
+    const formData = new FormData(event.target);
+    const username = formData.get('username');
+    const password = formData.get('password');
+  
+    // If username or password is not found, log it to debug
+    if (!username || !password) {
+      console.error('Form data not found correctly:', { username, password });
+      setErrorMessage('Username or password is missing.');
+      return;
+    }
+  
     try {
       const response = await fetch(`${BACKEND_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-        }),
+        body: JSON.stringify({ username, password }),
       });
-      
+  
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Login failed');
       }
-
+  
       const data = await response.json();
-
       if (response.status === 200) {
         console.log('Navigating to lobby with username:', data.username);
-        // Navigate to the lobby and pass the username in state
         navigate('/lobby', { state: { username: data.username } });
       }
     } catch (error) {
+      console.error('Login error:', error);
       setErrorMessage(error.message || 'An error occurred during login.');
     }
   }
-
+  
+  
 
   // Handle sign-up form submission
   async function handleSignUp(event) {
@@ -136,8 +139,8 @@ function App() {
         <div className="form-container">
           <h2 id="login">Login</h2>
           <form onSubmit={handleLogin}>
-            <input type="text" placeholder="Username" required />
-            <input type="password" placeholder="Password" required />
+            <input type="text" name="username" placeholder="Username" required />
+            <input type="password" name="password" placeholder="Password" required />
             <button type="submit">Login</button>
             <p>
               Don't have an account?{' '}
