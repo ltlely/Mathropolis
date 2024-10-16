@@ -149,7 +149,7 @@ io.on('connection', (socket) => {
     const { username, avatar } = data;
 
     if (playerCount >= maxPlayers) {
-      socket.emit('maxPlayersReached');
+      socket.emit('maxPlayersReached', { message: 'Maximum players reached.' });
       socket.disconnect();
       return;
     }
@@ -172,22 +172,26 @@ io.on('connection', (socket) => {
 
     io.emit('playerJoined', { id: socket.id, username, team, playerData });
 
-    // If four players have joined, emit 'gameReady'
+    // If max players have joined, emit 'gameReady'
     if (playerCount === maxPlayers) {
       io.emit('gameReady', { players });
     }
+  });
 
-    // Handle player disconnection
-    socket.on('disconnect', () => {
-      console.log('A user disconnected:', socket.id);
-      teams.team1 = teams.team1.filter((player) => player.id !== socket.id);
-      teams.team2 = teams.team2.filter((player) => player.id !== socket.id);
-      players = players.filter((player) => player.id !== socket.id);
-      io.emit('playerLeft', { id: socket.id });
-      playerCount--;
+  // Handle player disconnection
+  socket.on('disconnect', () => {
+    console.log('A user disconnected:', socket.id);
+    // Remove player from teams and players list
+    ['team1', 'team2'].forEach((team) => {
+      teams[team] = teams[team].filter((player) => player.id !== socket.id);
     });
+    players = players.filter((player) => player.id !== socket.id);
+    playerCount--;
+
+    io.emit('playerLeft', { id: socket.id });
   });
 });
+
 
 // === Serve Static Files ===
 
