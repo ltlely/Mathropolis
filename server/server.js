@@ -29,7 +29,7 @@ const corsOptions = {
 };
 
 // Apply CORS middleware to Express
-app.use(cors(corsOptions));
+app.use('*', cors(corsOptions));
 
 // Middleware to parse JSON and URL-encoded data from the request body
 app.use(express.json());
