@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 import './Chat.css';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
-let socket;
 
 const Chat = ({ username }) => {
   const [message, setMessage] = useState('');
@@ -14,31 +13,35 @@ const Chat = ({ username }) => {
   const [notifications, setNotifications] = useState({});
   const [users, setUsers] = useState([]);
 
+  const socketRef = useRef(null);
+
   useEffect(() => {
-    if (!socket) {
-      // Initialize socket connection only once
-      socket = io(BACKEND_URL, {
+    if (!socketRef.current) {
+      socketRef.current = io(BACKEND_URL, {
         query: { username },
       });
 
-      // Register the user
       if (username) {
-        socket.emit('registerUser', username);
+        socketRef.current.emit('registerUser', username);
       }
 
-      // Listen for previous messages (load existing messages when joining)
-      socket.on('previousMessages', (messages) => {
+      socketRef.current.on('previousMessages', (messages) => {
         setChat(messages);
       });
 
-      // Listen for updated user list
-      socket.on('updateUserList', (usersList) => {
+      socketRef.current.on('updateUserList', (usersList) => {
         setUsers(usersList.filter((user) => user !== username));
       });
 
-      // Listen for new public messages
-      socket.on('publicMessage', (data) => {
-        setChat((prevChat) => [...prevChat, data]);
+      socketRef.current.on('publicMessage', (data) => {
+        // Only update the chat if the message does not already exist in the chat array
+        setChat((prevChat) => {
+          if (!prevChat.find((msg) => msg.message === data.message && msg.senderName === data.senderName)) {
+            return [...prevChat, data];
+          }
+          return prevChat;
+        });
+
         if (activeTab !== 'public') {
           setNotifications((prevNotifications) => ({
             ...prevNotifications,
@@ -47,40 +50,41 @@ const Chat = ({ username }) => {
         }
       });
 
-      // Listen for private messages
-      socket.on('privateMessage', (data) => {
+      socketRef.current.on('privateMessage', (data) => {
         const { senderName, recipient } = data;
         const chatPartner = senderName === username ? recipient : senderName;
 
-        // Update private chats
         setPrivateChats((prevPrivateChats) => {
           const updatedChats = { ...prevPrivateChats };
           if (!updatedChats[chatPartner]) {
             updatedChats[chatPartner] = [];
           }
-          updatedChats[chatPartner].push(data);
+          if (!updatedChats[chatPartner].find((msg) => msg.message === data.message && msg.senderName === data.senderName)) {
+            updatedChats[chatPartner].push(data);
+          }
           return updatedChats;
         });
 
-        // Add notification if user is not in the active chat with sender
-        if (username === recipient && activeTab !== senderName) {
+        if (senderName !== username && activeTab !== chatPartner) {
           setNotifications((prevNotifications) => ({
             ...prevNotifications,
-            [senderName]: (prevNotifications[senderName] || 0) + 1,
+            [chatPartner]: (prevNotifications[chatPartner] || 0) + 1,
           }));
         }
       });
-
-      // Clean up the socket when the component is unmounted
-      return () => {
-        socket.off('previousMessages');
-        socket.off('publicMessage');
-        socket.off('privateMessage');
-        socket.disconnect(); // Disconnect socket on component unmount
-        socket = null;
-      };
     }
-  }, [username]);
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off('previousMessages');
+        socketRef.current.off('updateUserList');
+        socketRef.current.off('publicMessage');
+        socketRef.current.off('privateMessage');
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+    };
+  }, [username, activeTab]);
 
   const sendMessage = () => {
     if (message.trim() !== '') {
@@ -90,12 +94,14 @@ const Chat = ({ username }) => {
         recipient: activeTab === 'public' ? null : activeTab,
       };
 
+      // Emit the message via socket (do not update chat immediately)
       if (activeTab === 'public') {
-        socket.emit('publicMessage', messageData);
+        socketRef.current.emit('publicMessage', messageData);
       } else {
-        // Avoid sending multiple times by ensuring single emit
-        socket.emit('privateMessage', messageData);
+        socketRef.current.emit('privateMessage', messageData);
       }
+
+      // Clear the input field
       setMessage('');
     }
   };
@@ -116,6 +122,13 @@ const Chat = ({ username }) => {
       const updatedNotifications = { ...prevNotifications };
       delete updatedNotifications[selectedUser];
       return updatedNotifications;
+    });
+    // Ensure the private chat exists
+    setPrivateChats((prevPrivateChats) => {
+      if (!prevPrivateChats[selectedUser]) {
+        return { ...prevPrivateChats, [selectedUser]: [] };
+      }
+      return prevPrivateChats;
     });
   };
 
@@ -159,7 +172,7 @@ const Chat = ({ username }) => {
           </div>
         ))
       ) : (
-        <p style={{ color: "#00ffff"}}>No messages yet. Start chatting!</p>
+        <p style={{ color: "#00ffff" }}>No messages yet. Start chatting!</p>
       );
     } else {
       return privateChats[activeTab]?.length > 0 ? (

@@ -161,53 +161,68 @@ const filterOldMessages = () => {
 let players = []; // Maintain a list of all connected users
 let queuedPlayers = []; // Track the queued players
 
+const updateQueueForAll = () => {
+  io.emit('updateQueue', {
+    players: queuedPlayers,
+    queueCount: queuedPlayers.length
+  });
+};
+
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
-  // Send current queue state to the newly connected user
-  socket.emit('updateQueue', { players: queuedPlayers });
-
-  // Add user to connected players list
+  // Register user
   socket.on('registerUser', (username) => {
     if (!players.find(player => player.username === username)) {
       players.push({ id: socket.id, username });
-      io.emit('updateUserList', players.map(player => player.username)); // Broadcast updated user list
+      io.emit('updateUserList', players.map(player => player.username));
     }
   });
 
-  // Handle player joining the queue
+  // Handle join queue
   socket.on('joinQueue', ({ username }) => {
-    if (!queuedPlayers.find(player => player.id === socket.id)) {
+    if (!queuedPlayers.find(player => player.username === username)) {
       queuedPlayers.push({ id: socket.id, username });
-    }
-
-    // Broadcast updated queue to all clients
-    io.emit('updateQueue', { players: queuedPlayers });
-
-    // Start game when queue is full
-    if (queuedPlayers.length === 4) {
-      io.emit('gameReady', { players: queuedPlayers });
-      queuedPlayers = []; // Clear the queue after the game is ready
+      updateQueueForAll();
     }
   });
 
-  // Handle player leaving the queue
+  // Handle leave queue
   socket.on('leaveQueue', ({ username }) => {
-    queuedPlayers = queuedPlayers.filter(player => player.id !== socket.id);
-
-    // Broadcast updated queue to all clients
-    io.emit('updateQueue', { players: queuedPlayers });
+    queuedPlayers = queuedPlayers.filter(player => player.username !== username);
+    updateQueueForAll();
   });
 
-  // Handle user disconnecting
+  // Handle public messages
+  socket.on('publicMessage', (data) => {
+    io.emit('publicMessage', { ...data, timestamp: Date.now() });
+  });
+
+  // Handle private messages
+  socket.on('privateMessage', (data) => {
+    const { recipient } = data;
+    const recipientSocket = players.find(player => player.username === recipient);
+    if (recipientSocket) {
+      io.to(recipientSocket.id).emit('privateMessage', data);
+      socket.emit('privateMessage', data);
+    }
+  });
+
+  // Handle disconnect
   socket.on('disconnect', () => {
     console.log('A user disconnected:', socket.id);
-    players = players.filter((player) => player.id !== socket.id);
-    queuedPlayers = queuedPlayers.filter((player) => player.id !== socket.id); // Remove from queue if queued
-    
-    // Broadcast updated queue and user list to all clients
-    io.emit('updateQueue', { players: queuedPlayers });
-    io.emit('updateUserList', players.map(player => player.username)); // Broadcast updated user list
+    players = players.filter(player => player.id !== socket.id);
+    queuedPlayers = queuedPlayers.filter(player => player.id !== socket.id);
+    io.emit('updateUserList', players.map(player => player.username));
+    updateQueueForAll();
+  });
+
+  // Handle player left
+  socket.on('playerLeft', ({ id }) => {
+    players = players.filter(player => player.id !== id);
+    queuedPlayers = queuedPlayers.filter(player => player.id !== id);
+    io.emit('updateUserList', players.map(player => player.username));
+    updateQueueForAll();
   });
 });
 

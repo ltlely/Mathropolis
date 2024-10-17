@@ -18,19 +18,26 @@ const Lobby = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const username = location.state?.username || 'Unknown Player';
-  const [avatar, setAvatar] = useState(localStorage.getItem(`avatar-${location.state?.username || 'Unknown Player'}`) || null);
+  const [avatar, setAvatar] = useState(localStorage.getItem(`avatar-${username}`) || null);
 
-  // Initialize socket and store it in state to prevent multiple connections
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
+    if (username === 'Unknown Player') {
+      navigate('/');
+      return;
+    }
+
     const newSocket = io(BACKEND_URL, { query: { username } });
     setSocket(newSocket);
 
     return () => {
-      newSocket.disconnect();
+      if (newSocket) {
+        newSocket.emit('playerLeft', { id: newSocket.id });
+        newSocket.disconnect();
+      }
     };
-  }, [username]);
+  }, [username, navigate]);
 
   useEffect(() => {
     if (socket && avatar) {
@@ -41,12 +48,13 @@ const Lobby = () => {
   useEffect(() => {
     if (!socket) return;
 
-    // This handler updates the state with the latest queue information
     const handleUpdateQueue = (data) => {
       setPlayers(data.players);
-      setQueueCount(data.players.length);
-      setGameReady(data.players.length === 4);
-      if (data.players.length === 4) {
+      setQueueCount(data.queueCount);
+      setGameReady(data.queueCount === 4);
+      setIsQueueing(data.players.some(player => player.username === username));
+      
+      if (data.queueCount === 4) {
         setIsGameStarting(true);
         setTimeout(() => {
           navigate('/game', { state: { username, avatar, players: data.players } });
@@ -55,34 +63,26 @@ const Lobby = () => {
     };
 
     const handlePlayerLeft = (data) => {
-      setPlayers((prevPlayers) => {
-        const updatedPlayers = prevPlayers.filter((player) => player.id !== data.id);
-        setQueueCount(updatedPlayers.length);
-        setGameReady(updatedPlayers.length === 4);
-        return updatedPlayers;
-      });
+      setPlayers((prevPlayers) => prevPlayers.filter((player) => player.id !== data.id));
+      // The server will send an updateQueue event, so we don't need to update queueCount here
     };
 
     const handleMaxPlayersReached = () => {
       alert('The game is full. Please try again later.');
-      handleLeaveQueue();
     };
 
     const handleDisconnect = (reason) => {
       console.log('Socket disconnected:', reason);
-      // Only navigate if not in the middle of starting the game
       if (!isGameStarting) {
         navigate('/');
       }
     };
 
-    // Listen for queue updates from the server
     socket.on('updateQueue', handleUpdateQueue);
     socket.on('playerLeft', handlePlayerLeft);
     socket.on('maxPlayersReached', handleMaxPlayersReached);
     socket.on('disconnect', handleDisconnect);
 
-    // Cleanup function to remove the listener when the component is unmounted
     return () => {
       socket.off('updateQueue', handleUpdateQueue);
       socket.off('playerLeft', handlePlayerLeft);
@@ -131,23 +131,35 @@ const Lobby = () => {
   const handleJoinQueue = () => {
     if (socket) {
       socket.emit('joinQueue', { username });
-      setIsQueueing(true);
+      // We'll rely on the server's response to update the queue state
     }
   };
 
   const handleLeaveQueue = () => {
     if (socket) {
       socket.emit('leaveQueue', { username });
-      setIsQueueing(false);
+      // We'll rely on the server's response to update the queue state
     }
   };
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (socket) {
+        socket.emit('playerLeft', { id: socket.id });
+        socket.disconnect();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [socket]);
 
   return (
     <>
       <div className={`lobby-container ${isGameStarting ? 'game-starting' : ''}`}>
-        <div className="header">
-          <h1>Welcome to the Game Lobby!</h1>
-        </div>
         <div className="user-info">
           <div className="avatar-placeholder" onClick={handleAvatarClick}>
             {avatar ? (
@@ -169,7 +181,7 @@ const Lobby = () => {
             </div>
           )}
         </div>
-        {!gameReady && !isQueueing && players.length < 4 && (
+        {!gameReady && !isQueueing && (
           <button className="join-queue-button" onClick={handleJoinQueue}>
             Join Game
           </button>

@@ -5,7 +5,8 @@
     "test": "react-scripts test",
     "heroku-postbuild": "cd client && npm install && npm run build",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "clean": "rimraf build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
