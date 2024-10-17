@@ -1,12 +1,10 @@
 // Game.js
 import './Game.css';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001';
-
 
 const Game = () => {
   const numbers = [0,1,2,3,4,5,6,7,8,9];
@@ -48,12 +46,15 @@ const Game = () => {
 
 
   const navigate = useNavigate();
+  const socketRef = useRef(null);
+
   const handleQuit = () => {
-    // Perform any necessary cleanup here
-    socket.disconnect(); // Disconnect from Socket.IO if needed
+    if (socketRef.current) {
+      socketRef.current.disconnect(); // Disconnect from Socket.IO
+      socketRef.current = null;
+    }
     navigate('/lobby'); // Navigate back to the lobby
   };
-
 
   useEffect(() => {
     // Update players' usernames and avatars based on their IDs
@@ -72,7 +73,36 @@ const Game = () => {
   }, [username, avatar]);
 
   useEffect(() => {
-    // Socket listeners (if you're using sockets)
+    // Create a new socket connection if not already connected
+    if (!socketRef.current) {
+      const newSocket = io(BACKEND_URL, {
+        query: { username },
+      });
+      socketRef.current = newSocket;
+
+      newSocket.on('connect', () => {
+        console.log('Connected to backend');
+      });
+
+      newSocket.on('connect_error', (err) => {
+        console.error('Socket connection error:', err);
+      });
+
+      // Cleanup on component unmount
+      return () => {
+        if (socketRef.current) {
+          socketRef.current.disconnect();
+          socketRef.current = null;
+        }
+      };
+    }
+  }, [username]);
+
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (!socket) return;
+
+    // Socket listeners
     socket.on('playerJoined', (data) => {
       setPlayers((prevPlayers) => [...prevPlayers, data.playerData]);
       generateMathProblemForPlayer(data.playerData.id);
@@ -82,6 +112,7 @@ const Game = () => {
       setPlayers((prevPlayers) => prevPlayers.filter((player) => player.id !== data.id));
     });
 
+    // Cleanup listeners on unmount or socket change
     return () => {
       socket.off('playerJoined');
       socket.off('playerLeft');
@@ -97,7 +128,7 @@ const Game = () => {
     } else {
       setIsGameActive(true); // Enable game interaction after countdown
     }
-  }, [countdown]);
+  }, [countdown]); 
 
   const renderPlayers = () => (
     <div className="players-row">

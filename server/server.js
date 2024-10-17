@@ -1,5 +1,3 @@
-// server.js
-
 const express = require('express');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
@@ -38,13 +36,9 @@ const corsOptions = {
   credentials: true, // Allow cookies and Authorization headers
 };
 
-
-
 // Apply the CORS middleware to all routes
 app.use(cors(corsOptions));
-
 app.options('*', cors(corsOptions)); // Handle preflight requests
-
 
 // Middleware to parse JSON and URL-encoded data from the request body
 app.use(express.json());
@@ -57,7 +51,6 @@ const io = socketIo(server, {
 
 // PostgreSQL pool connection
 const connectionString = process.env.DATABASE_URL;
-
 const pool = new Pool({
   connectionString,
   ssl: {
@@ -123,7 +116,7 @@ app.post('/signup', async (req, res) => {
 
 // Login Route
 app.post('/login', async (req, res) => {
-  const { username, password } = req.body; // Get user input from request body
+  const { username, password } = req.body;
 
   try {
     // Check if the username exists in the database
@@ -149,62 +142,72 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// Store chat messages for up to 3 hours (in-memory storage)
+let chatMessages = [];
 
-// === Socket.IO Logic ===
+// Limit message history to 3 hours or a maximum number of messages
+const MAX_MESSAGE_AGE = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
+const MAX_MESSAGE_COUNT = 100; // Max number of messages to store
 
-let playerCount = 0;
-const maxPlayers = 4;
-const teams = { team1: [], team2: [] };
-let players = []; // Maintain a list of all connected players
+// Function to filter out old messages
+const filterOldMessages = () => {
+  const now = Date.now();
+  chatMessages = chatMessages.filter(
+    (msg) => now - msg.timestamp < MAX_MESSAGE_AGE
+  );
+};
+
+// Socket.IO Logic
+let players = []; // Maintain a list of all connected users
+let queuedPlayers = []; // Track the queued players
 
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
-  // Handle 'playerJoined' event from client
-  socket.on('playerJoined', (data) => {
-    const { username, avatar } = data;
+  // Send current queue state to the newly connected user
+  socket.emit('updateQueue', { players: queuedPlayers });
 
-    if (playerCount >= maxPlayers) {
-      socket.emit('maxPlayersReached', { message: 'Maximum players reached.' });
-      socket.disconnect();
-      return;
-    }
-
-    playerCount++;
-
-    // Assign player to a team alternately
-    const team = playerCount % 2 === 0 ? 'team2' : 'team1';
-
-    const playerData = {
-      id: socket.id,
-      username,
-      avatar: avatar || '/path/to/default/avatar.png',
-      score: 0,
-      team,
-    };
-
-    teams[team].push(playerData);
-    players.push(playerData);
-
-    io.emit('playerJoined', { id: socket.id, username, team, playerData });
-
-    // If max players have joined, emit 'gameReady'
-    if (playerCount === maxPlayers) {
-      io.emit('gameReady', { players });
+  // Add user to connected players list
+  socket.on('registerUser', (username) => {
+    if (!players.find(player => player.username === username)) {
+      players.push({ id: socket.id, username });
+      io.emit('updateUserList', players.map(player => player.username)); // Broadcast updated user list
     }
   });
 
-  // Handle player disconnection
+  // Handle player joining the queue
+  socket.on('joinQueue', ({ username }) => {
+    if (!queuedPlayers.find(player => player.id === socket.id)) {
+      queuedPlayers.push({ id: socket.id, username });
+    }
+
+    // Broadcast updated queue to all clients
+    io.emit('updateQueue', { players: queuedPlayers });
+
+    // Start game when queue is full
+    if (queuedPlayers.length === 4) {
+      io.emit('gameReady', { players: queuedPlayers });
+      queuedPlayers = []; // Clear the queue after the game is ready
+    }
+  });
+
+  // Handle player leaving the queue
+  socket.on('leaveQueue', ({ username }) => {
+    queuedPlayers = queuedPlayers.filter(player => player.id !== socket.id);
+
+    // Broadcast updated queue to all clients
+    io.emit('updateQueue', { players: queuedPlayers });
+  });
+
+  // Handle user disconnecting
   socket.on('disconnect', () => {
     console.log('A user disconnected:', socket.id);
-    // Remove player from teams and players list
-    ['team1', 'team2'].forEach((team) => {
-      teams[team] = teams[team].filter((player) => player.id !== socket.id);
-    });
     players = players.filter((player) => player.id !== socket.id);
-    playerCount--;
-
-    io.emit('playerLeft', { id: socket.id });
+    queuedPlayers = queuedPlayers.filter((player) => player.id !== socket.id); // Remove from queue if queued
+    
+    // Broadcast updated queue and user list to all clients
+    io.emit('updateQueue', { players: queuedPlayers });
+    io.emit('updateUserList', players.map(player => player.username)); // Broadcast updated user list
   });
 });
 
